@@ -12,15 +12,25 @@ def unpack_data(input_dir, output_file):
     """
     data_frames = []
     for file_name in os.listdir(input_dir):
-        if file_name.endswith('.csv') or 'data-' in file_name:
+        if file_name.endswith('.csv'):
             file_path = os.path.join(input_dir, file_name)
-            data = pd.read_csv(
-                file_path,
-                names=['sequence', 'family_accession', 'sequence_name', 'aligned_sequence', 'family_id']
-            )
-            data_frames.append(data)
+            try:
+                data = pd.read_csv(
+                    file_path,
+                    names=['sequence', 'family_accession', 'sequence_name', 'aligned_sequence', 'family_id']
+                )
+                data_frames.append(data)
+                print(f"Loaded {file_name} with {len(data)} rows.")
+            except Exception as e:
+                print(f"Failed to read {file_name}: {e}")
+    
+    if not data_frames:
+        print("No CSV files found in the directory.")
+        return
+
     combined_data = pd.concat(data_frames, ignore_index=True)
     combined_data.to_csv(output_file, index=False)
+    print(f"Combined data saved to {output_file} with {len(combined_data)} total rows.")
 
 
 if __name__ == "__main__":
@@ -32,3 +42,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     unpack_data(args.input_dir, args.output_file)
+    
